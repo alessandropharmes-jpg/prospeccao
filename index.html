@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Prospecção CRM</title>
+  <style>
+    :root { --bg: #f4f6fb; --card: #fff; --text: #1c2233; --muted: #6b7489; --primary: #5b5bd6; --danger: #d6455b; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #0f1320; --card: #171c2b; --text: #e8ebf5; --muted: #8d96ad; --primary: #8b8bf0; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--text);
+      font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .card { background: var(--card); border-radius: 14px; padding: 28px; max-width: 420px; width: 100%; box-shadow: 0 4px 16px rgba(20,30,60,.08); text-align: center; }
+    .logo { font-size: 30px; color: var(--primary); }
+    h1 { font-size: 19px; margin: 8px 0; }
+    p { color: var(--muted); margin: 6px 0; }
+    a.btn { display: inline-block; margin-top: 14px; padding: 10px 18px; border-radius: 10px; background: var(--primary); color: #fff; text-decoration: none; font-weight: 600; }
+    .err { color: var(--danger); }
+    .spin { width: 22px; height: 22px; border: 3px solid var(--muted); border-top-color: var(--primary); border-radius: 50%; margin: 14px auto 0; animation: r 0.8s linear infinite; }
+    @keyframes r { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">◎</div>
+    <h1>Prospecção CRM</h1>
+    <div id="box"><p>Abrindo o sistema…</p><div class="spin"></div></div>
+  </div>
+  <script>
+    // O endereço atual do sistema fica em link.json, atualizado sozinho pelo próprio sistema
+    const box = document.getElementById('box');
+    const show = (html) => { box.innerHTML = html; };
+    (async () => {
+      let info;
+      try {
+        info = await fetch('link.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => r.json());
+      } catch {
+        return show('<p class="err">Não foi possível ler o endereço do sistema. Tente recarregar a página.</p>');
+      }
+      if (!info || !info.url) return show('<p class="err">O sistema está sem endereço público no momento (acesso pela internet desligado).</p>');
+      // Confere se o endereço responde antes de redirecionar (o PC pode estar desligado)
+      let up = false;
+      try {
+        await fetch(info.url + '/api/auth/state', { mode: 'no-cors', cache: 'no-store', signal: AbortSignal.timeout(12000) });
+        up = true;
+      } catch { /* fora do ar */ }
+      if (up) {
+        location.replace(info.url + '/');
+        return;
+      }
+      show(`<p class="err"><b>O sistema está fora do ar agora.</b></p>
+        <p>O computador que roda o sistema pode estar desligado, sem internet, ou acabou de trocar de endereço.
+        Aguarde um ou dois minutos e recarregue esta página.</p>
+        <a class="btn" href="">Tentar de novo</a>`);
+    })();
+  </script>
+</body>
+</html>
