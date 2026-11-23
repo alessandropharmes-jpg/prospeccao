@@ -5,27 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
   <title>Prospecção CRM</title>
-  <style>
-    :root { --bg: #f4f6fb; --card: #fff; --text: #1c2233; --muted: #6b7489; --primary: #5b5bd6; --danger: #d6455b; --line: #dfe3ee; }
-    @media (prefers-color-scheme: dark) { :root { --bg: #0f1320; --card: #171c2b; --text: #e8ebf5; --muted: #8d96ad; --primary: #8b8bf0; --line: #2a3145; } }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--text);
-      font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-    .card { background: var(--card); border-radius: 14px; padding: 28px; max-width: 400px; width: 100%; box-shadow: 0 4px 16px rgba(20,30,60,.08); }
-    .head { text-align: center; }
-    .logo { font-size: 30px; color: var(--primary); }
-    h1 { font-size: 19px; margin: 8px 0 14px; }
-    p { color: var(--muted); margin: 6px 0; }
-    label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
-    input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--text); font: inherit; }
-    button, a.btn { display: block; width: 100%; margin-top: 16px; padding: 11px 18px; border: 0; border-radius: 10px; background: var(--primary); color: #fff;
-      text-decoration: none; text-align: center; font: inherit; font-weight: 600; cursor: pointer; }
-    a.alt { display: block; text-align: center; margin-top: 12px; color: var(--muted); font-size: 13px; }
-    .err { color: var(--danger); }
-    .spin { width: 22px; height: 22px; border: 3px solid var(--muted); border-top-color: var(--primary); border-radius: 50%; margin: 14px auto 0; animation: r 0.8s linear infinite; }
-    @keyframes r { to { transform: rotate(360deg); } }
-    [hidden] { display: none !important; }
-  </style>
+  <link rel="stylesheet" href="estilo.css?v=2" />
 </head>
 <body>
   <div class="card">
@@ -39,50 +19,20 @@
       <input id="u" name="username" required autocomplete="username" autocapitalize="none" />
       <label for="p">Senha</label>
       <input id="p" name="password" type="password" required autocomplete="current-password" />
+      <a class="link" href="esqueci.html">Esqueceu a senha?</a>
       <button type="submit">Entrar</button>
       <a id="direct" class="alt" href="#">Já entrei neste aparelho hoje — abrir direto</a>
     </form>
   </div>
+  <script src="sistema.js?v=2"></script>
   <script>
-    // O endereço atual do sistema fica em link.json, atualizado sozinho pelo próprio sistema
-    const box = document.getElementById('box');
     const form = document.getElementById('f');
-    const show = (html) => { box.innerHTML = html; box.hidden = false; };
-
-    const erro = new URLSearchParams(location.hash.slice(1)).get('erro');
-    if (erro) {
-      const m = document.getElementById('msg');
-      m.textContent = erro;
-      m.hidden = false;
-      history.replaceState(null, '', location.pathname);
-    }
-
-    (async () => {
-      let info;
-      try {
-        info = await fetch('link.json?t=' + Date.now(), { cache: 'no-store' }).then((r) => r.json());
-      } catch {
-        return show('<p class="err">Não foi possível ler o endereço do sistema. Tente recarregar a página.</p>');
-      }
-      if (!info || !info.url) return show('<p class="err">O sistema está sem endereço público no momento (acesso pela internet desligado).</p>');
-      // Confere se o endereço responde (o PC pode estar desligado)
-      let up = false;
-      try {
-        await fetch(info.url + '/api/auth/state', { mode: 'no-cors', cache: 'no-store', signal: AbortSignal.timeout(12000) });
-        up = true;
-      } catch { /* fora do ar */ }
-      if (!up) {
-        return show(`<p class="err"><b>O sistema está fora do ar agora.</b></p>
-          <p>O computador que roda o sistema pode estar desligado, sem internet, ou acabou de trocar de endereço.
-          Aguarde um ou dois minutos e recarregue esta página.</p>
-          <a class="btn" href="">Tentar de novo</a>`);
-      }
-      form.action = info.url + '/api/auth/form-login';
-      document.getElementById('direct').href = info.url + '/';
-      box.hidden = true;
-      form.hidden = false;
+    mostrarErro(document.getElementById('msg'), lerHash().get('erro'));
+    if (location.hash) history.replaceState(null, '', location.pathname);
+    conectar('/api/auth/form-login', form, document.getElementById('box'), (url) => {
+      document.getElementById('direct').href = url + '/';
       document.getElementById(document.getElementById('u').value ? 'p' : 'u').focus();
-    })();
+    });
   </script>
 </body>
 </html>
