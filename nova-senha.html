@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Nova senha – Prospecção CRM</title>
+  <link rel="stylesheet" href="estilo.css?v=2" />
+</head>
+<body>
+  <div class="card">
+    <div class="head"><div class="logo">◎</div><h1>Criar nova senha</h1></div>
+    <div id="nolink" hidden>
+      <p class="err">Este link de recuperação está incompleto.</p>
+      <p>Abra o link direto do e-mail ou peça um novo.</p>
+      <a class="btn" href="esqueci.html">Pedir novo link</a>
+    </div>
+    <div id="box" class="head"><p>Conectando ao sistema…</p><div class="spin"></div></div>
+    <form id="f" method="post" hidden>
+      <p id="msg" class="err" hidden></p>
+      <input type="hidden" name="token" id="t" />
+      <label for="p">Nova senha (mín. 8 caracteres)</label>
+      <input id="p" name="password" type="password" required minlength="8" autocomplete="new-password" />
+      <label for="p2">Repita a nova senha</label>
+      <input id="p2" name="password2" type="password" required minlength="8" autocomplete="new-password" />
+      <button type="submit">Salvar e entrar</button>
+      <a class="alt" href="esqueci.html">Pedir novo link</a>
+    </form>
+  </div>
+  <script src="sistema.js?v=2"></script>
+  <script>
+    // O código vem depois do # (não vai para nenhum servidor nem fica em registro de acesso)
+    const h = lerHash();
+    const token = h.get('t');
+    history.replaceState(null, '', location.pathname);
+    const form = document.getElementById('f');
+    if (!token) {
+      document.getElementById('nolink').hidden = false;
+      document.getElementById('box').hidden = true;
+    } else {
+      document.getElementById('t').value = token;
+      mostrarErro(document.getElementById('msg'), h.get('erro'));
+      form.onsubmit = (e) => {
+        if (form.password.value !== form.password2.value) {
+          e.preventDefault();
+          mostrarErro(document.getElementById('msg'), 'As duas senhas não são iguais');
+        }
+      };
+      conectar('/api/auth/form-reset', form, document.getElementById('box'), () => document.getElementById('p').focus());
+    }
+  </script>
+</body>
+</html>
