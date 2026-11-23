@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Esqueceu a senha – Prospecção CRM</title>
+  <link rel="stylesheet" href="estilo.css?v=2" />
+</head>
+<body>
+  <div class="card">
+    <div class="head"><div class="logo">◎</div><h1>Esqueceu a senha?</h1></div>
+
+    <div id="sent" hidden>
+      <p class="ok"><b>Pronto! Confira seu e-mail.</b></p>
+      <p>Se o usuário ou e-mail informado estiver cadastrado, enviamos um link para criar a nova senha.
+        Ele vale 30 minutos. Olhe também a caixa de spam.</p>
+      <p>Não chegou? O administrador precisa ter cadastrado o seu e-mail no sistema.</p>
+      <a class="btn" href="./">Voltar para o login</a>
+    </div>
+
+    <div id="box" class="head"><p>Conectando ao sistema…</p><div class="spin"></div></div>
+    <form id="f" method="post" hidden>
+      <p>Informe seu usuário ou e-mail. Vamos enviar um link para você criar uma senha nova.</p>
+      <p id="msg" class="err" hidden></p>
+      <label for="l">Usuário ou e-mail</label>
+      <input id="l" name="login" required autocomplete="username" autocapitalize="none" />
+      <button type="submit">Enviar link de recuperação</button>
+      <a class="alt" href="./">Voltar para o login</a>
+    </form>
+  </div>
+  <script src="sistema.js?v=2"></script>
+  <script>
+    const h = lerHash();
+    if (location.hash) history.replaceState(null, '', location.pathname);
+    if (h.get('enviado')) {
+      document.getElementById('sent').hidden = false;
+      document.getElementById('box').hidden = true;
+    } else {
+      mostrarErro(document.getElementById('msg'), h.get('erro'));
+      conectar('/api/auth/form-forgot', document.getElementById('f'), document.getElementById('box'),
+        () => document.getElementById('l').focus());
+    }
+  </script>
+</body>
+</html>
