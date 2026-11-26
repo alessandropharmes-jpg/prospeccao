@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Criar conta – Prospecção CRM</title>
+  <link rel="stylesheet" href="estilo.css?v=3" />
+</head>
+<body>
+  <div class="card">
+    <div class="head"><div class="logo">◎</div><h1>Criar conta</h1></div>
+
+    <div id="sent" hidden>
+      <p class="ok"><b>Pedido enviado!</b></p>
+      <p>O administrador vai analisar o seu cadastro. Assim que ele aprovar, você já consegue entrar com o usuário e a senha que acabou de criar.</p>
+      <a class="btn" href="./">Ir para o login</a>
+    </div>
+
+    <div id="box" class="head"><p>Conectando ao sistema…</p><div class="spin"></div></div>
+    <form id="f" method="post" hidden>
+      <p>Preencha seus dados. O acesso é liberado depois que o administrador aprovar.</p>
+      <p id="msg" class="err" hidden></p>
+      <label for="n">Nome completo</label>
+      <input id="n" name="name" required maxlength="80" autocomplete="name" />
+      <label for="u">Usuário (para entrar no sistema)</label>
+      <input id="u" name="username" required minlength="3" maxlength="40" pattern="[A-Za-z0-9._\-]{3,40}"
+        title="3 a 40 letras, números, ponto, hífen ou _ (sem espaço)" autocomplete="username" autocapitalize="none" placeholder="ex.: maria.silva" />
+      <label for="e">E-mail (para recuperar a senha)</label>
+      <input id="e" name="email" type="email" required maxlength="120" autocomplete="email" />
+      <label for="p">Senha (mín. 8 caracteres)</label>
+      <input id="p" name="password" type="password" required minlength="8" autocomplete="new-password" />
+      <label for="p2">Repita a senha</label>
+      <input id="p2" name="password2" type="password" required minlength="8" autocomplete="new-password" />
+      <button type="submit">Enviar pedido de acesso</button>
+      <a class="alt" href="./">Já tenho conta — entrar</a>
+    </form>
+  </div>
+  <script src="sistema.js?v=3"></script>
+  <script>
+    const h = lerHash();
+    if (location.hash) history.replaceState(null, '', location.pathname);
+    const form = document.getElementById('f');
+    if (h.get('enviado')) {
+      document.getElementById('sent').hidden = false;
+      document.getElementById('box').hidden = true;
+    } else {
+      // volta com os dados preenchidos quando dá erro (menos a senha)
+      for (const k of ['name', 'username', 'email']) if (h.get(k)) form[k].value = h.get(k);
+      mostrarErro(document.getElementById('msg'), h.get('erro'));
+      form.onsubmit = (e) => {
+        if (form.password.value !== form.password2.value) {
+          e.preventDefault();
+          mostrarErro(document.getElementById('msg'), 'As duas senhas não são iguais');
+        }
+      };
+      conectar('/api/auth/form-signup', form, document.getElementById('box'), () => form.name.focus());
+    }
+  </script>
+</body>
+</html>

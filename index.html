@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
   <title>Prospecção CRM</title>
-  <link rel="stylesheet" href="estilo.css?v=2" />
+  <link rel="stylesheet" href="estilo.css?v=3" />
 </head>
 <body>
   <div class="card">
@@ -21,10 +21,11 @@
       <input id="p" name="password" type="password" required autocomplete="current-password" />
       <a class="link" href="esqueci.html">Esqueceu a senha?</a>
       <button type="submit">Entrar</button>
+      <p class="signup">Não tem acesso? <a href="cadastro.html">Criar conta</a></p>
       <a id="direct" class="alt" href="#">Já entrei neste aparelho hoje — abrir direto</a>
     </form>
   </div>
-  <script src="sistema.js?v=2"></script>
+  <script src="sistema.js?v=3"></script>
   <script>
     const form = document.getElementById('f');
     mostrarErro(document.getElementById('msg'), lerHash().get('erro'));
